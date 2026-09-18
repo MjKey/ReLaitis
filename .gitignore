@@ -1,0 +1,45 @@
+# ==========================================
+# Игнорирование всех .md файлов, кроме README
+# ==========================================
+*.md
+!README.md
+!readme.md
+**/*.md
+!**/README.md
+!**/readme.md
+
+# ==========================================
+# .NET / C# Сборка и временные файлы
+# ==========================================
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+publish/
+
+# Visual Studio & IDEs
+.vs/
+.idea/
+.vscode/
+*.user
+*.userprefs
+*.suo
+*.sln.docstates
+*.sln.iml
+
+# Тесты
+[Tt]est[Rr]esults/
+*.trx
+*.coverage
+
+# Windows служебные файлы
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Локальные модели и логи
+models/
+*.onnx
+*.bin
+startup_diag.log

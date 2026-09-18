@@ -1,0 +1,52 @@
+namespace ReLaitis.Core.Enums;
+
+/// <summary>
+/// Тип действия в макросе (100% совместимость с Laitis).
+/// </summary>
+public enum ActionType
+{
+    OpenFile = 0,
+    CloseApp = 1,
+    Hotkeys = 2,
+    MouseMove = 3,
+    Say = 4,
+    TypeText = 5,
+    PlayAudio = 6,
+    OpenURL = 7,
+    WebPageScript = 8,
+    Pause = 9,
+    IfProcessSelected = 10,
+    IfProcessExists = 11,
+    IfWebsiteSelected = 12,
+    MouseButton = 13,
+    HttpWebRequest = 14,
+    SetVariableValue = 15,
+    IfVariableValue = 16,
+    IfWebsiteNavValue = 17,
+    ShowWindow = 18,
+    WebPageFocus = 19,
+    WebPageClick = 20,
+    WebPageGetText = 21,
+    WebPageNavigate = 22,
+    WebPageNavClick = 23,
+    WebPagePopupOpen = 24,
+    MouseMoveOn = 25,
+    Else = 26,
+    EndBlock = 27,
+    Comment = 28,
+    MouseScroll = 29,
+    TogglePackActivity = 30,
+    RandomActionBlock = 31,
+    Loop = 32,
+    JetAim = 33,
+    BatchScript = 34,
+    Break = 35,
+    WaitNextPhrase = 36,
+    WaitNextCommand = 36,
+    ScheduleEvent = 37,
+    Notify = 38,
+    VoiceCommand = 39,
+    GetUrlSelectorText = 40,
+    While = 41,
+    CSharpScript = 42
+}

@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ReLaitis.sln
+
+      - name: Build and Publish ReLaitis.UI (win-x64)
+        run: |
+          dotnet publish src/ReLaitis.UI/ReLaitis.UI.csproj -c Release -r win-x64 --self-contained false -o publish/ReLaitis
+
+      - name: Package Extension
+        shell: pwsh
+        run: |
+          if (Test-Path "src/ReLaitis.Extension") {
+            Copy-Item -Path "src/ReLaitis.Extension" -Destination "publish/ReLaitis/BrowserExtension" -Recurse
+          }
+          if (Test-Path "README.md") {
+            Copy-Item -Path "README.md" -Destination "publish/ReLaitis/"
+          }
+
+      - name: Create Zip Archive
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          Compress-Archive -Path "publish/ReLaitis/*" -DestinationPath "ReLaitis-$tag-win-x64.zip" -Force
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ReLaitis ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            ReLaitis-*-win-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

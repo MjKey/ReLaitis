@@ -1,0 +1,1242 @@
+<Window x:Class="ReLaitis.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:helpers="clr-namespace:ReLaitis.UI.Helpers"
+        Title="ReLaitis - Голосовое управление ПК"
+        Height="820" Width="1240"
+        MinHeight="680" MinWidth="1050"
+        WindowStartupLocation="CenterScreen"
+        Background="#0B0F19"
+        Foreground="#F8FAFC">
+
+    <Window.Resources>
+        <helpers:ActionTypeToBadgeBgConverter x:Key="ActionBadgeBgConv"/>
+        <helpers:ActionTypeToBadgeTextConverter x:Key="ActionBadgeTextConv"/>
+        <helpers:ActionTypeToBadgeFgConverter x:Key="ActionBadgeFgConv"/>
+
+        <!-- 1. СТИЛЬ ПЕРЕКЛЮЧАТЕЛЕЙ ВКЛАДОК В ШАПКЕ -->
+        <Style x:Key="NavTabStyle" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#94A3B8"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="16,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#0284C7"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsChecked" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Bd" Property="Background" Value="#1E293B"/>
+                                <Setter Property="Foreground" Value="#F8FAFC"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 2. СТИЛЬ ДЛЯ ОБЫЧНЫХ RADIO BUTTONS (СВЕТЛЫЙ ТЕКСТ В ТЁМНОЙ ТЕМЕ) -->
+        <Style TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Grid VerticalAlignment="Center" Margin="0,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="DotBorder" Width="16" Height="16" CornerRadius="8"
+                                    Background="#0F172A" BorderBrush="#475569" BorderThickness="1.5"
+                                    VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Ellipse x:Name="Dot" Width="8" Height="8" Fill="#38BDF8"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         Visibility="Collapsed"/>
+                            </Border>
+                            <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="DotBorder" Property="BorderBrush" Value="#38BDF8"/>
+                                <Setter TargetName="Dot" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="DotBorder" Property="BorderBrush" Value="#38BDF8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 3. СТИЛЬ ЧЕКБОКСОВ (ГАЛОЧКА СТРОГО ПО ЦЕНТРУ, БЕЗ СМЕЩЕНИЙ) -->
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid VerticalAlignment="Center" Margin="0,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="BoxBorder" Grid.Column="0" Width="18" Height="18"
+                                    Background="#0F172A" BorderBrush="#475569" BorderThickness="1.5"
+                                    CornerRadius="4" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Viewbox Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path x:Name="CheckMark" Data="M 1.5,5.5 L 4.5,8.5 L 10.5,1.5"
+                                          Stroke="#FFFFFF" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                          Visibility="Collapsed"/>
+                                </Viewbox>
+                            </Border>
+                            <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="BoxBorder" Property="Background" Value="#0284C7"/>
+                                <Setter TargetName="BoxBorder" Property="BorderBrush" Value="#38BDF8"/>
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BoxBorder" Property="BorderBrush" Value="#38BDF8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 4. СТИЛЬ ВЫПАДАЮЩЕГО СПИСКА COMBOBOX (ТЁМНАЯ ТЕМА, НЕТ БЕЛЫХ БЛОКОВ) -->
+        <Style x:Key="ModernComboBoxToggle" TargetType="ToggleButton">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="ClickMode" Value="Press"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="templateRoot" Background="#0F172A" BorderBrush="#334155" BorderThickness="1" CornerRadius="6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="32"/>
+                                </Grid.ColumnDefinitions>
+                                <Path x:Name="arrow" Grid.Column="1" Data="M 0 0 L 4.5 4.5 L 9 0"
+                                      Stroke="#94A3B8" StrokeThickness="1.5"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="templateRoot" Property="BorderBrush" Value="#0284C7"/>
+                                <Setter TargetName="arrow" Property="Stroke" Value="#38BDF8"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="templateRoot" Property="BorderBrush" Value="#0284C7"/>
+                                <Setter TargetName="arrow" Property="Stroke" Value="#38BDF8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Style="{StaticResource ModernComboBoxToggle}"
+                                          IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <ContentPresenter Margin="12,0,34,0" IsHitTestVisible="False"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                              VerticalAlignment="Center" HorizontalAlignment="Left">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#F8FAFC"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                            <Popup x:Name="PART_Popup" AllowsTransparency="True" IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   Placement="Bottom" PopupAnimation="Slide">
+                                <Border Background="#0F172A" BorderBrush="#334155" BorderThickness="1" CornerRadius="6"
+                                        MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                        MaxHeight="260" Padding="3" Margin="0,4,0,0">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="12" ShadowDepth="3" Opacity="0.5" Color="#000000"/>
+                                    </Border.Effect>
+                                    <ScrollViewer SnapsToDevicePixels="True" VerticalScrollBarVisibility="Auto">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1E293B"/>
+                                <Setter Property="Foreground" Value="#38BDF8"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#0284C7"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- 0. Верхняя шапка -->
+            <RowDefinition Height="*"/>    <!-- 1. Основное содержимое (Вкладки) -->
+            <RowDefinition Height="Auto"/> <!-- 2. Нижний статус-бар и тест -->
+        </Grid.RowDefinitions>
+
+        <!-- 1. ВЕРХНЯЯ ШАПКА (HEADER) -->
+        <Border Grid.Row="0" Background="#111827" BorderBrush="#1F2937" BorderThickness="0,0,0,1" Padding="16,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Логотип и версия -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="ReLaitis" FontSize="20" FontWeight="ExtraBold" Foreground="#38BDF8" VerticalAlignment="Center"/>
+                    <Border Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="5" Margin="8,0,0,0" Padding="6,2" VerticalAlignment="Center">
+                        <TextBlock Text="v2.0" FontSize="10" FontWeight="Bold" Foreground="#94A3B8"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- Центр: Вкладки навигации -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="3">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton x:Name="TabCollectionsRadio" Content="Коллекции" GroupName="NavTabs" Style="{StaticResource NavTabStyle}" IsChecked="True" Click="NavTab_Click"/>
+                            <RadioButton x:Name="TabVariablesRadio" Content="Переменные" GroupName="NavTabs" Style="{StaticResource NavTabStyle}" Click="NavTab_Click"/>
+                            <RadioButton x:Name="TabSettingsRadio" Content="Настройки" GroupName="NavTabs" Style="{StaticResource NavTabStyle}" Click="NavTab_Click"/>
+                            <RadioButton x:Name="TabHistoryRadio" Content="Журнал" GroupName="NavTabs" Style="{StaticResource NavTabStyle}" Click="NavTab_Click"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Правый блок: Статус прослушивания и быстрые действия -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Капсула статуса -->
+                    <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="16" Padding="8,3" Margin="0,0,10,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse x:Name="ListeningPulseDot" Width="9" Height="9" Fill="#10B981" Margin="3,0,7,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="ListeningStatusLabel" Text="Слушаю постоянно" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="#F8FAFC" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <Button x:Name="MuteToggleBtn" Content="Пауза" FontSize="11" Padding="8,2" Margin="0,0,4,0"
+                                    Background="#1E293B" BorderBrush="#334155" Click="MuteToggleBtn_Click"
+                                    ToolTip="Временно приостановить или возобновить микрофон"/>
+                            <Border Width="1" Height="12" Background="#334155" Margin="2,0,4,0" VerticalAlignment="Center"/>
+                            <Button x:Name="DownloadModelBtn" Content="Vosk" FontSize="11" Padding="8,2"
+                                    Background="#064E3B" BorderBrush="#10B981" Click="DownloadModelBtn_Click"
+                                    ToolTip="Статус языковой модели распознавания"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Быстрые действия -->
+                    <Button x:Name="SavePacksBtn" Content="Сохранить" Background="#064E3B" BorderBrush="#10B981" Foreground="#34D399" FontWeight="SemiBold"
+                            Padding="10,5" FontSize="11" Click="SavePacksBtn_Click" Margin="0,0,6,0" ToolTip="Сохранить изменения пакетов и команд на диск"/>
+                    <Button x:Name="ToggleJetAimBtn" Content="JetAim" Padding="8,5" FontSize="11" Margin="0,0,4,0" Click="ToggleJetAimBtn_Click" ToolTip="Сетка мыши JetAim (активация голосом 'сетка' или кликом)"/>
+                    <Button x:Name="ToggleHudBtn" Content="HUD" Padding="8,5" FontSize="11" Click="ToggleHudBtn_Click" ToolTip="Показать или скрыть плавающий оверлей HUD"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 2. ОСНОВНОЕ СОДЕРЖИМОЕ (ВКЛАДКИ) -->
+        <Grid Grid.Row="1">
+            <!-- ==================== ВКЛАДКА 1: КОЛЛЕКЦИИ ==================== -->
+            <Grid x:Name="CollectionsPanel" Margin="16,12" Visibility="Visible">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250" MinWidth="200"/>
+                    <ColumnDefinition Width="6"/>
+                    <ColumnDefinition Width="280" MinWidth="220"/>
+                    <ColumnDefinition Width="6"/>
+                    <ColumnDefinition Width="*" MinWidth="480"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- КОЛОНКА 1: ПАКЕТЫ -->
+                <Border Grid.Column="0" Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="12" Padding="14">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Шапка колонки пакетов -->
+                        <Grid Grid.Row="0" Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="ПАКЕТЫ" FontSize="12" FontWeight="Bold" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button x:Name="AddPackBtn" Content="+ Пакет" Padding="9,4" FontSize="11" Background="#0284C7" BorderBrush="#0EA5E9" Click="AddPackBtn_Click" ToolTip="Создать новый пакет"/>
+                                <Button x:Name="DeletePackBtn" Content="✕" Width="24" Height="24" Padding="0" Margin="4,0,0,0" Click="DeletePackBtn_Click" ToolTip="Удалить выбранный пакет"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Список пакетов -->
+                        <ListBox x:Name="PacksListBox" Grid.Row="1" SelectionChanged="PacksListBox_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="2,2">
+                                        <Grid.ColumnDefinitions>
+                                             <ColumnDefinition Width="*"/>
+                                             <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="#F8FAFC" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding DisplaySubtitle}" FontSize="11" Foreground="#64748B" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                        <CheckBox Grid.Column="1" IsChecked="{Binding IsActive}" VerticalAlignment="Center" Margin="12,0,4,0" ToolTip="Активность пакета"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!-- Нижняя панель импорта и экспорта пакетов -->
+                        <Grid Grid.Row="2" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="ImportLaitisBtn" Grid.Column="0" Content="Импорт" Padding="0,6" FontSize="11"
+                                    Background="#1E293B" BorderBrush="#334155" Click="ImportLaitisBtn_Click"
+                                    ToolTip="Импортировать пакеты из Laitis (.laitis / Save.json) или JSON"/>
+                            <Button x:Name="ExportPackBtn" Grid.Column="2" Content="Экспорт" Padding="0,6" FontSize="11"
+                                    Background="#1E293B" BorderBrush="#334155" Click="ExportPackBtn_Click"
+                                    ToolTip="Экспортировать выбранный пакет в JSON"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Разделитель колонок 1-2 -->
+                <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent" Focusable="False" Cursor="SizeWE"/>
+
+                <!-- КОЛОНКА 2: КОМАНДЫ -->
+                <Border Grid.Column="2" Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="12" Padding="14">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Шапка колонки команд -->
+                        <Grid Grid.Row="0" Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="КОМАНДЫ" FontSize="12" FontWeight="Bold" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button x:Name="AddCommandBtn" Content="+ Команда" Background="#0284C7" BorderBrush="#0EA5E9" Padding="8,3" FontSize="11" Click="AddCommandBtn_Click" ToolTip="Добавить новую команду"/>
+                                <Button x:Name="DeleteCommandBtn" Content="✕" Width="24" Height="24" Padding="0" Margin="4,0,0,0" Click="DeleteCommandBtn_Click" ToolTip="Удалить выбранную команду"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Поиск команд -->
+                        <TextBox x:Name="SearchCommandsBox" Grid.Row="1" Height="32" Margin="0,0,0,10"
+                                 helpers:PlaceholderHelper.Placeholder="Поиск команд и фраз..."
+                                 TextChanged="SearchCommandsBox_TextChanged"/>
+
+                        <!-- Список команд -->
+                        <ListBox x:Name="CommandsListBox" Grid.Row="2" SelectionChanged="CommandsListBox_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="2,2">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Text="{Binding DisplayTitle}" FontWeight="SemiBold" Foreground="#F8FAFC" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Grid.Row="1" Text="{Binding DisplaySubtitle}" FontSize="11" Foreground="#94A3B8" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+
+                <!-- Разделитель колонок 2-3 -->
+                <GridSplitter Grid.Column="3" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent" Focusable="False" Cursor="SizeWE"/>
+
+                <!-- КОЛОНКА 3: РЕДАКТОР КОМАНДЫ И МАКРОСА -->
+                <Border Grid.Column="4" Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="12" Padding="18">
+                    <Grid>
+                        <!-- Пустое состояние (команда не выбрана) -->
+                        <Grid x:Name="CommandEmptyState" Visibility="Visible" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Border Width="48" Height="48" CornerRadius="24" Background="#1E293B" HorizontalAlignment="Center" Margin="0,0,0,12">
+                                    <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Команда не выбрана" FontSize="16" FontWeight="Bold" Foreground="#94A3B8" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Выберите команду из списка слева или нажмите «+ Команда» для создания нового макроса"
+                                           FontSize="12" Foreground="#64748B" Margin="0,6,0,0" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="360"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Панель редактирования выбранной команды -->
+                        <Grid x:Name="CommandEditorPanel" Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/> <!-- Название -->
+                                <RowDefinition Height="Auto"/> <!-- Фразы активации -->
+                                <RowDefinition Height="Auto"/> <!-- Заголовок цепочки действий -->
+                                <RowDefinition Height="*"/>    <!-- Список действий -->
+                                <RowDefinition Height="Auto"/> <!-- Подсказка внизу -->
+                            </Grid.RowDefinitions>
+
+                            <!-- Название команды -->
+                            <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                                <TextBlock Text="НАЗВАНИЕ КОМАНДЫ" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" Margin="0,0,0,6"/>
+                                <TextBox x:Name="CommandNameEditorBox" Height="34" FontWeight="SemiBold" FontSize="13"
+                                         helpers:PlaceholderHelper.Placeholder="Например: Открой YouTube"
+                                         TextChanged="CommandNameEditorBox_TextChanged"/>
+                            </StackPanel>
+
+                            <!-- Фразы вызова -->
+                            <StackPanel Grid.Row="1" Margin="0,0,0,14">
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="ФРАЗЫ ВЫЗОВА (ПО ОДНОЙ НА СТРОКУ):" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                    <Button x:Name="ApplyPhrasesBtn" Grid.Column="1" Content="Применить" Background="#0284C7" BorderBrush="#0EA5E9"
+                                            Padding="8,2" FontSize="11" Click="ApplyPhrasesBtn_Click"/>
+                                </Grid>
+                                <TextBox x:Name="CommandPhrasesBox" Height="56" TextWrapping="Wrap" AcceptsReturn="True"
+                                         Background="#0F172A" Padding="8,6" VerticalScrollBarVisibility="Auto"
+                                         helpers:PlaceholderHelper.Placeholder="произнесите любую из этих фраз (по одной строке на синоним)"/>
+                            </StackPanel>
+
+                            <!-- Панель управления действиями макроса -->
+                            <Grid Grid.Row="2" Margin="0,0,0,8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Верхняя панель управления цепочкой действий -->
+                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="ЦЕПОЧКА ДЕЙСТВИЙ" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button x:Name="MoveActionUpBtn" Content="▲" Width="26" Height="26" Padding="0" Margin="0,0,3,0" Click="MoveActionUpBtn_Click" ToolTip="Поднять действие выше"/>
+                                        <Button x:Name="MoveActionDownBtn" Content="▼" Width="26" Height="26" Padding="0" Margin="0,0,6,0" Click="MoveActionDownBtn_Click" ToolTip="Опустить действие ниже"/>
+                                        <Button x:Name="EditActionBtn" Content="Изменить" Padding="9,3" FontSize="11" Margin="0,0,4,0" Click="EditActionBtn_Click" ToolTip="Редактировать выбранное действие"/>
+                                        <Button x:Name="DeleteActionBtn" Content="✕" Width="26" Height="26" Padding="0" Click="DeleteActionBtn_Click" ToolTip="Удалить выбранное действие"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Панель быстрого добавления действий -->
+                                <Border Grid.Row="1" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="6,4">
+                                    <WrapPanel VerticalAlignment="Center">
+                                        <!-- Добавить Условие -->
+                                        <Button x:Name="AddConditionMenuBtn" Content="+ Условие ▾" Padding="7,3" FontSize="11" Margin="0,2,4,2"
+                                                Background="#1E293B" BorderBrush="#F59E0B" Foreground="#FCD34D" Click="AddConditionMenuBtn_Click"
+                                                ToolTip="Добавить Условие: активность окна, процесс, сайт, переменная, цикл"/>
+                                        <!-- Добавить Действие -->
+                                        <Button x:Name="AddActionMenuBtn" Content="+ Действие ▾" Padding="7,3" FontSize="11" Margin="0,2,4,2"
+                                                Background="#1E293B" BorderBrush="#0284C7" Foreground="#38BDF8" Click="AddActionMenuBtn_Click"
+                                                ToolTip="Добавить Действие: открыть файл, закрыть программу, сказать, скрипт"/>
+                                        <!-- Добавить Полезное Действие -->
+                                        <Button x:Name="AddUtilityMenuBtn" Content="+ Полезное ▾" Padding="7,3" FontSize="11" Margin="0,2,4,2"
+                                                Background="#1E293B" BorderBrush="#10B981" Foreground="#34D399" Click="AddUtilityMenuBtn_Click"
+                                                ToolTip="Добавить Полезное Действие: переменные, пауза, таймер, уведомление"/>
+                                        <!-- Добавить Действие Ввода -->
+                                        <Button x:Name="AddInputMenuBtn" Content="+ Ввод ▾" Padding="7,3" FontSize="11" Margin="0,2,4,2"
+                                                Background="#1E293B" BorderBrush="#818CF8" Foreground="#A5B4FC" Click="AddInputMenuBtn_Click"
+                                                ToolTip="Добавить Действие Ввода: клавиши, клик мыши, сетка JetAim, напечатать текст"/>
+                                        <!-- Браузерные действия -->
+                                        <Button x:Name="AddBrowserMenuBtn" Content="+ Браузер ▾" Padding="7,3" FontSize="11" Margin="0,2,4,2"
+                                                Background="#1E293B" BorderBrush="#EC4899" Foreground="#F472B6" Click="AddBrowserMenuBtn_Click"
+                                                ToolTip="Браузерные действия: клик по номеру, фокус, переход, javascript"/>
+                                        <!-- + Каталог всех действий -->
+                                        <Button x:Name="AddActionBtn" Content="+ Каталог" Padding="7,3" FontSize="11" Margin="0,2,0,2"
+                                                Background="#1E293B" BorderBrush="#64748B" Foreground="#CBD5E1" Click="AddActionBtn_Click"
+                                                ToolTip="Открыть полный каталог всех действий"/>
+                                    </WrapPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- Список действий с визуальной иерархией логических блоков -->
+                            <ListBox x:Name="ActionsListBox" Grid.Row="3" Background="#0F172A" BorderBrush="#1F2937" BorderThickness="1"
+                                     Padding="6" MouseDoubleClick="ActionsListBox_MouseDoubleClick">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="{Binding IndentMargin}" Background="{Binding CardBackground}"
+                                                BorderBrush="{Binding CardBorderBrush}" BorderThickness="{Binding CardBorderThickness}"
+                                                CornerRadius="6" Padding="10,7">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/> <!-- Направляющая ветки -->
+                                                    <ColumnDefinition Width="Auto"/> <!-- Номер шага -->
+                                                    <ColumnDefinition Width="Auto"/> <!-- Бейдж типа -->
+                                                    <ColumnDefinition Width="*"/>    <!-- Описание действия -->
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Линия ветвления слева -->
+                                                <Border Grid.Column="0" Width="2" Background="#38BDF8" Opacity="0.5" Margin="0,0,8,0"
+                                                        Visibility="{Binding GuideLineVisibility}"/>
+
+                                                <!-- Номер шага -->
+                                                <TextBlock Grid.Column="1" Text="{Binding StepNumber}" FontSize="11" Foreground="#64748B"
+                                                           FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0" Width="22"/>
+
+                                                <!-- Бейдж действия -->
+                                                <Border Grid.Column="2" Background="{Binding BadgeBg}" CornerRadius="4" Padding="7,2"
+                                                        Margin="0,0,10,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding BadgeText}" Foreground="{Binding BadgeFg}" FontWeight="Bold" FontSize="10"/>
+                                                </Border>
+
+                                                <!-- Описание действия -->
+                                                <TextBlock Grid.Column="3" Text="{Binding DisplayDescription}" Foreground="#F8FAFC"
+                                                           FontSize="12" FontWeight="Medium" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <!-- Подсказка внизу редактора -->
+                            <Border Grid.Row="4" Background="#0B1220" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,8,0,0">
+                                <TextBlock Text="Подсказка: Двойной клик по действию открывает редактирование. Для добавления нескольких действий используйте «+ Действие»."
+                                           FontSize="11" Foreground="#64748B" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- ==================== ВКЛАДКА 2: ПЕРЕМЕННЫЕ ==================== -->
+            <Border x:Name="VariablesPanel" Margin="16,12" Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="12" Padding="18" Visibility="Collapsed">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/> <!-- Шапка: заголовок, поиск и кнопки -->
+                        <RowDefinition Height="*"/>    <!-- Таблица переменных -->
+                        <RowDefinition Height="Auto"/> <!-- Карточка-подсказка -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Шапка панели переменных -->
+                    <Grid Grid.Row="0" Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="ОБЩИЕ ПЕРЕМЕННЫЕ" FontSize="14" FontWeight="Bold" Foreground="#38BDF8" VerticalAlignment="Center"/>
+                            <Border Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="10" Margin="10,0,0,0" Padding="8,2" VerticalAlignment="Center">
+                                <TextBlock x:Name="VariablesCountText" Text="0 переменных" FontSize="11" Foreground="#94A3B8" FontWeight="SemiBold"/>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Поиск переменной -->
+                        <Grid Grid.Column="1" HorizontalAlignment="Right" Width="260" Margin="0,0,14,0">
+                            <TextBox x:Name="SearchVariablesBox" Height="32" Padding="8,5"
+                                     helpers:PlaceholderHelper.Placeholder="Поиск по имени или значению..."
+                                     TextChanged="SearchVariablesBox_TextChanged"/>
+                        </Grid>
+
+                        <!-- Кнопки управления -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="AddVariableBtn" Content="+ Новая переменная" Background="#0284C7" BorderBrush="#0EA5E9"
+                                    Padding="12,6" FontSize="11" FontWeight="Bold" Margin="0,0,8,0" Click="AddVariableBtn_Click"
+                                    ToolTip="Создать новую общую переменную для использования в макросах"/>
+                            <Button x:Name="SaveVariablesBtn" Content="Сохранить" Background="#064E3B" BorderBrush="#10B981" Foreground="#34D399"
+                                    Padding="12,6" FontSize="11" FontWeight="SemiBold" Click="SaveVariablesBtn_Click"
+                                    ToolTip="Сохранить общие переменные на диск (%LOCALAPPDATA%\ReLaitis\GlobalVariables.json)"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Список/таблица переменных -->
+                    <Border Grid.Row="1" Background="#0F172A" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="8" Padding="2">
+                        <ListView x:Name="VariablesListView" Background="Transparent" BorderThickness="0"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDoubleClick="VariablesListView_MouseDoubleClick">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Padding" Value="8,6"/>
+                                    <Setter Property="Margin" Value="2,2"/>
+                                    <Setter Property="Background" Value="#111827"/>
+                                    <Setter Property="BorderBrush" Value="#1F2937"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListViewItem">
+                                                <Border x:Name="ItemBorder" Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="ItemBorder" Property="Background" Value="#1E293B"/>
+                                                        <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#38BDF8"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="ItemBorder" Property="Background" Value="#0C4A6E"/>
+                                                        <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#0284C7"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="220"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="180"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Имя переменной -->
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Background="#1E293B" CornerRadius="3" Padding="4,1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <TextBlock Text="#" FontSize="10" FontWeight="Bold" Foreground="#38BDF8"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding Key}" FontSize="13" FontWeight="Bold" Foreground="#38BDF8" VerticalAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <!-- Текущее значение -->
+                                        <TextBlock Grid.Column="1" Text="{Binding Value}" FontSize="12" Foreground="#F8FAFC"
+                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="8,0"/>
+
+                                        <!-- Тег подстановки -->
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                                <TextBlock Text="{Binding Placeholder}" FontSize="11" FontFamily="Consolas" Foreground="#34D399"/>
+                                            </Border>
+                                            <Button Padding="4,2" Margin="6,0,0,0" Background="Transparent" BorderThickness="0"
+                                                    Click="CopyPlaceholderBtn_Click" ToolTip="Скопировать тег в буфер обмена">
+                                                <Path Width="12" Height="12" Stretch="Uniform" Fill="#94A3B8"
+                                                      Data="M4 2 C3 2 2 3 2 4 V10 H4 V4 H10 V2 Z M6 6 C5 6 4 7 4 8 V14 C4 15 5 16 6 16 H12 C13 16 14 15 14 14 V8 C14 7 13 6 12 6 Z M6 8 H12 V14 H6 Z"/>
+                                            </Button>
+                                        </StackPanel>
+
+                                        <!-- Кнопки редактирования и удаления -->
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Width="28" Height="26" Padding="0" Margin="0,0,4,0" Background="#1E293B" BorderBrush="#334155"
+                                                    Click="EditVariableItemBtn_Click" ToolTip="Редактировать значение">
+                                                <Path Width="11" Height="11" Stretch="Uniform" Fill="#94A3B8"
+                                                      Data="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
+                                            </Button>
+                                            <Button Content="✕" Width="28" Height="26" Padding="0" Background="#1E293B" BorderBrush="#334155" Foreground="#F87171"
+                                                    Click="DeleteVariableItemBtn_Click" ToolTip="Удалить переменную"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Border>
+
+                    <!-- Карточка-подсказка внизу -->
+                    <Border Grid.Row="2" Background="#0B1220" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,12,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                                <TextBlock Text="Как использовать в макросах:" FontSize="12" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,4"/>
+                                <TextBlock Text="• Вставляйте {имя} в текст: «Сказать: Привет, {username}!», «Ввод текста: {city}»." FontSize="11" Foreground="#94A3B8" TextWrapping="Wrap"/>
+                                <TextBlock Text="• Задавайте значение действием «Установить переменную»: имя = volume, значение = {volume} + 5." FontSize="11" Foreground="#94A3B8" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Встроенные системные переменные:" FontSize="12" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,4"/>
+                                <TextBlock Text="• {ActiveProcess} (активный процесс), {ActiveTitle} (заголовок окна)" FontSize="11" Foreground="#94A3B8" TextWrapping="Wrap"/>
+                                <TextBlock Text="• {Time} (HH:mm:ss), {Date} (гггг-мм-дд), {BrowserUrl}, {BrowserTitle}" FontSize="11" Foreground="#94A3B8" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- ==================== ВКЛАДКА 3: НАСТРОЙКИ (ПОЛНАЯ ШИРИНА, ЧИТАЕМЫЙ ТЕКСТ) ==================== -->
+            <ScrollViewer x:Name="SettingsPanel" Margin="20,16" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                <Grid HorizontalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Настройки ReLaitis" FontSize="18" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,16"/>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- ЛЕВАЯ КОЛОНКА НАСТРОЕК -->
+                        <StackPanel Grid.Column="0">
+                            <!-- Карточка 1: Распознавание речи (STT) -->
+                            <Border Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="ДВИЖОК РАСПОЗНАВАНИЯ РЕЧИ (STT)" FontSize="12" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,14"/>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                        <RadioButton x:Name="VoskEngineRadio" GroupName="SttEngineGroup" Content="Vosk (быстрый, 45 МБ)" IsChecked="True" Checked="EngineRadio_Checked" Margin="0,0,20,0"/>
+                                        <RadioButton x:Name="WhisperEngineRadio" GroupName="SttEngineGroup" Content="OpenAI Whisper (нейросеть)" Checked="EngineRadio_Checked"/>
+                                    </StackPanel>
+
+                                    <!-- Выбор модели Whisper -->
+                                    <StackPanel x:Name="WhisperModelPanel" Margin="0,0,0,14" Visibility="Collapsed">
+                                        <TextBlock Text="Модель Whisper:" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                        <ComboBox x:Name="WhisperModelComboBox" Height="34">
+                                            <ComboBoxItem Content="tiny (75 МБ - легкая)"/>
+                                            <ComboBoxItem Content="base (142 МБ - рекомендованная)" IsSelected="True"/>
+                                            <ComboBoxItem Content="small (466 МБ - наивысшая точность)"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <!-- Устройство ввода -->
+                                    <TextBlock Text="Устройство ввода (микрофон):" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                    <ComboBox x:Name="AudioDeviceComboBox" Height="34" Margin="0,0,0,16"/>
+
+                                    <!-- Режим активации -->
+                                    <TextBlock Text="Режим активации прослушивания:" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,6"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                        <RadioButton x:Name="ContinuousRadio" GroupName="ListeningModeGroup" Content="Постоянно" IsChecked="True" Margin="0,0,16,0"/>
+                                        <RadioButton x:Name="WakeWordRadio" GroupName="ListeningModeGroup" Content="Wake Word" Margin="0,0,16,0"/>
+                                        <RadioButton x:Name="PttRadio" GroupName="ListeningModeGroup" Content="Push-to-Talk"/>
+                                    </StackPanel>
+
+                                    <!-- Фраза Wake Word -->
+                                    <Grid Margin="0,0,0,14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="130"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                            <TextBlock Text="Фраза активации (Wake Word):" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                            <TextBox x:Name="WakeWordBox" Text="лэйтис" Height="34"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Таймаут (сек):" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                            <TextBox x:Name="WakeWordTimeoutBox" Text="6" Height="34"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Push-to-Talk клавиша -->
+                                    <TextBlock Text="Клавиша Push-to-Talk:" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                    <ComboBox x:Name="PttKeyComboBox" Height="34">
+                                        <ComboBoxItem Content="CapsLock" IsSelected="True"/>
+                                        <ComboBoxItem Content="ScrollLock"/>
+                                        <ComboBoxItem Content="NumPad0"/>
+                                        <ComboBoxItem Content="F12"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Карточка 2: Система и HUD -->
+                            <Border Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="12" Padding="18">
+                                <StackPanel>
+                                    <TextBlock Text="ПОВЕДЕНИЕ И ОВЕРЛЕЙ" FontSize="12" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,14"/>
+
+                                    <CheckBox x:Name="SoundFeedbackCheckBox" Content="Звуковые сигналы обратной связи (Audio Chimes)" Margin="0,0,0,10" IsChecked="True"/>
+                                    <CheckBox x:Name="AutoStartCheckBox" Content="Запускать ReLaitis вместе с Windows (в трей)" Margin="0,0,0,14"/>
+
+                                    <CheckBox x:Name="ShowHudCheckBox" Content="Показывать плавающий HUD оверлей на рабочем столе" Margin="0,0,0,10"/>
+                                    <TextBlock Text="Прозрачность HUD оверлея:" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                    <Grid Margin="0,0,0,14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="50"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Slider x:Name="HudOpacitySlider" Grid.Column="0" Minimum="0.3" Maximum="1.0" Value="0.95" SmallChange="0.05" LargeChange="0.1" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding ElementName=HudOpacitySlider, Path=Value, StringFormat={}{0:P0}}" Foreground="#38BDF8" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                    <Button x:Name="BrowserBridgeBtn" Content="Браузерное расширение (ReLaitis Extension)" Padding="12,7" Background="#1E293B" BorderBrush="#334155" Click="BrowserBridgeBtn_Click"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- ПРАВАЯ КОЛОНКА НАСТРОЕК -->
+                        <StackPanel Grid.Column="2">
+                            <!-- Карточка 3: Синтез речи (TTS) -->
+                            <Border Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="СЛУЖБА СИНТЕЗА РЕЧИ (ОЗВУЧКА ОТВЕТОВ)" FontSize="12" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,14"/>
+
+                                    <RadioButton x:Name="EdgeTtsRadio" GroupName="TtsProviderGroup" Content="Microsoft Edge Neural (Нейроголоса, высокое качество)" IsChecked="True" Checked="TtsRadio_Checked" Margin="0,0,0,8"/>
+                                    <RadioButton x:Name="SapiTtsRadio" GroupName="TtsProviderGroup" Content="Windows SAPI (Системные голоса Windows, офлайн)" Checked="TtsRadio_Checked" Margin="0,0,0,8"/>
+                                    <RadioButton x:Name="OpenAiTtsRadio" GroupName="TtsProviderGroup" Content="OpenAI TTS (через API ключ)" Checked="TtsRadio_Checked" Margin="0,0,0,14"/>
+
+                                    <!-- Голос Edge Neural -->
+                                    <StackPanel x:Name="EdgeVoicePanel" Margin="0,0,0,14">
+                                        <TextBlock Text="Нейроголос Edge:" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                        <ComboBox x:Name="EdgeVoiceComboBox" Height="34">
+                                            <ComboBoxItem Content="ru-RU-SvetlanaNeural (Светлана - женский)" IsSelected="True"/>
+                                            <ComboBoxItem Content="ru-RU-DmitryNeural (Дмитрий - мужской)"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <!-- Голос SAPI -->
+                                    <StackPanel x:Name="SapiVoicePanel" Margin="0,0,0,14" Visibility="Collapsed">
+                                        <TextBlock Text="Системный голос Windows SAPI:" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                        <ComboBox x:Name="SapiVoiceComboBox" Height="34"/>
+                                    </StackPanel>
+
+                                    <!-- Настройки OpenAI TTS -->
+                                    <StackPanel x:Name="OpenAiTtsPanel" Margin="0,0,0,14" Visibility="Collapsed">
+                                        <TextBlock Text="OpenAI API Key:" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                        <TextBox x:Name="OpenAiApiKeyBox" Height="34" Margin="0,0,0,8"/>
+                                        <TextBlock Text="Голос OpenAI:" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                        <ComboBox x:Name="OpenAiVoiceComboBox" Height="34">
+                                            <ComboBoxItem Content="alloy" IsSelected="True"/>
+                                            <ComboBoxItem Content="nova"/>
+                                            <ComboBoxItem Content="echo"/>
+                                            <ComboBoxItem Content="onyx"/>
+                                            <ComboBoxItem Content="fable"/>
+                                            <ComboBoxItem Content="shimmer"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <!-- Скорость речи и тест -->
+                                    <Grid Margin="0,6,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                                            <TextBlock Text="Скорость речи:" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,2"/>
+                                            <Slider x:Name="SpeechRateSlider" Minimum="-5" Maximum="5" Value="0" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                        </StackPanel>
+                                        <Button x:Name="TestTtsBtn" Grid.Column="1" Content="Тест голоса" Background="#0284C7" BorderBrush="#0EA5E9" Padding="14,4" Height="34" VerticalAlignment="Bottom" Click="TestTtsBtn_Click"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Кнопка сохранения настроек -->
+                            <Border Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="12" Padding="18">
+                                <StackPanel>
+                                    <Button x:Name="SaveSettingsBtn" Content="Сохранить настройки" Height="42" Background="#059669" BorderBrush="#10B981"
+                                            Foreground="#FFFFFF" FontSize="13" FontWeight="Bold" Click="SaveSettingsBtn_Click"/>
+                                    <TextBlock x:Name="SettingsStatusText" Text="" FontSize="11" Foreground="#34D399" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </ScrollViewer>
+
+            <!-- ==================== ВКЛАДКА 3: ЖУРНАЛ ==================== -->
+            <Border x:Name="HistoryPanel" Margin="16,12" Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="12" Padding="16" Visibility="Collapsed">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- 0: Статистика KPI -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- 1: Панель фильтров и поиска -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- 2: Основная область: Список + Инспектор деталей -->
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- РЯД 0: КАРТОЧКИ KPI СТАТИСТИКИ -->
+                    <Grid Grid.Row="0" Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Карточка 1: Всего событий -->
+                        <Border Grid.Column="0" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="ВСЕГО СОБЫТИЙ" FontSize="10" FontWeight="Bold" Foreground="#64748B"/>
+                                <TextBlock x:Name="HistoryTotalCountText" Text="0" FontSize="20" FontWeight="ExtraBold" Foreground="#F8FAFC" Margin="0,2,0,0"/>
+                                <TextBlock Text="в текущей сессии" FontSize="10" Foreground="#475569" Margin="0,1,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Карточка 2: Успешно выполнено -->
+                        <Border Grid.Column="1" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="УСПЕШНОСТЬ ВЫПОЛНЕНИЯ" FontSize="10" FontWeight="Bold" Foreground="#10B981"/>
+                                <TextBlock x:Name="HistorySuccessRateText" Text="100% (0)" FontSize="20" FontWeight="ExtraBold" Foreground="#34D399" Margin="0,2,0,0"/>
+                                <TextBlock Text="команд и действий" FontSize="10" Foreground="#475569" Margin="0,1,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Карточка 3: Без совпадений -->
+                        <Border Grid.Column="2" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="БЕЗ СОВПАДЕНИЙ" FontSize="10" FontWeight="Bold" Foreground="#F59E0B"/>
+                                <TextBlock x:Name="HistoryUnmatchedCountText" Text="0" FontSize="20" FontWeight="ExtraBold" Foreground="#FBBF24" Margin="0,2,0,0"/>
+                                <TextBlock Text="не распознано в команды" FontSize="10" Foreground="#475569" Margin="0,1,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Карточка 4: Средняя уверенность -->
+                        <Border Grid.Column="3" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="12,10">
+                            <StackPanel>
+                                <TextBlock Text="СРЕДНЯЯ ТОЧНОСТЬ" FontSize="10" FontWeight="Bold" Foreground="#38BDF8"/>
+                                <TextBlock x:Name="HistoryAvgConfidenceText" Text="-" FontSize="20" FontWeight="ExtraBold" Foreground="#60A5FA" Margin="0,2,0,0"/>
+                                <TextBlock Text="уверенность распознавания" FontSize="10" Foreground="#475569" Margin="0,1,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- РЯД 1: ПАНЕЛЬ ПОИСКА, ФИЛЬТРОВ И ДЕЙСТВИЙ -->
+                    <Grid Grid.Row="1" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Поиск -->
+                        <TextBox x:Name="HistorySearchBox" Grid.Column="0" Height="32" Padding="10,6"
+                                 helpers:PlaceholderHelper.Placeholder="Поиск по фразе, команде..."
+                                 TextChanged="HistorySearchBox_TextChanged"/>
+
+                        <!-- Фильтры (Чипсы) -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
+                            <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="2">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="HistoryFilterAllRadio" Content="Все" GroupName="HistoryFilterGroup"
+                                                 Style="{StaticResource NavTabStyle}" IsChecked="True" Checked="HistoryFilter_Checked" Padding="10,4" FontSize="11"/>
+                                    <RadioButton x:Name="HistoryFilterExecutedRadio" Content="Выполненные" GroupName="HistoryFilterGroup"
+                                                 Style="{StaticResource NavTabStyle}" Checked="HistoryFilter_Checked" Padding="10,4" FontSize="11"/>
+                                    <RadioButton x:Name="HistoryFilterUnmatchedRadio" Content="Без совпадений" GroupName="HistoryFilterGroup"
+                                                 Style="{StaticResource NavTabStyle}" Checked="HistoryFilter_Checked" Padding="10,4" FontSize="11"/>
+                                    <RadioButton x:Name="HistoryFilterDictationRadio" Content="Диктовка" GroupName="HistoryFilterGroup"
+                                                 Style="{StaticResource NavTabStyle}" Checked="HistoryFilter_Checked" Padding="10,4" FontSize="11"/>
+                                </StackPanel>
+                            </Border>
+                            <TextBlock x:Name="HistoryCountText" Text="Записей: 0" FontSize="11" Foreground="#64748B" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                        </StackPanel>
+
+                        <!-- Кнопки управления -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="CopyAllHistoryBtn" Content="Копировать всё" Padding="10,5" FontSize="11" Margin="0,0,8,0"
+                                    Background="#1E293B" BorderBrush="#334155" Click="CopyAllHistoryBtn_Click" ToolTip="Скопировать все видимые записи журнала в буфер обмена в текстовом виде"/>
+                            <Button Content="Очистить журнал" Padding="10,5" FontSize="11"
+                                    Background="#1E293B" BorderBrush="#334155" Click="ClearHistoryBtn_Click"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- РЯД 2: MASTER-DETAIL (СПИСОК И ИНСПЕКТОР) -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MinWidth="450"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="380" MinWidth="300" MaxWidth="550"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Левая колонка: Таблица записей с бейджами и расширенными колонками -->
+                        <ListView x:Name="HistoryListView" Grid.Column="0" Background="#0F172A" BorderBrush="#1F2937" BorderThickness="1"
+                                  SelectionChanged="HistoryListView_SelectionChanged">
+                            <ListView.View>
+                                <GridView>
+                                    <!-- Статус бейдж -->
+                                    <GridViewColumn Header="Статус" Width="95">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{Binding StatusBg}" BorderBrush="{Binding StatusBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left">
+                                                    <TextBlock Text="{Binding StatusText}" Foreground="{Binding StatusFg}" FontSize="10" FontWeight="Bold"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <!-- Время -->
+                                    <GridViewColumn Header="Время" Width="68">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Time}" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <!-- Распознанная фраза -->
+                                    <GridViewColumn Header="Услышанная фраза" Width="200">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Phrase}" Foreground="#F8FAFC" FontWeight="SemiBold" FontSize="11" TextTrimming="CharacterEllipsis" ToolTip="{Binding Phrase}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <!-- Команда и пакет -->
+                                    <GridViewColumn Header="Команда / Пакет" Width="170">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Vertical">
+                                                    <TextBlock Text="{Binding CommandName}" Foreground="#38BDF8" FontWeight="SemiBold" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding PackName}" Foreground="#64748B" FontSize="10" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <!-- Точность -->
+                                    <GridViewColumn Header="Точность" Width="65">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ConfidenceText}" Foreground="{Binding ConfidenceBrush}" FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <!-- Контекст процесса -->
+                                    <GridViewColumn Header="Активное окно / процесс" Width="150">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ProcessAndWindow}" Foreground="#94A3B8" FontSize="10" TextTrimming="CharacterEllipsis" ToolTip="{Binding ProcessAndWindow}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <!-- Длительность -->
+                                    <GridViewColumn Header="Время вып." Width="75">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding FormattedDuration}" Foreground="#64748B" FontSize="10" VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+
+                        <!-- Разделитель -->
+                        <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="#1E293B"/>
+
+                        <!-- Правая колонка: Детальный инспектор выбранной записи -->
+                        <Border Grid.Column="2" Background="#0F172A" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="8" Padding="14">
+                            <Grid>
+                                <!-- Заглушка, если ничего не выбрано -->
+                                <StackPanel x:Name="HistoryEmptySelectionPanel" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="Инспектор события" FontSize="13" FontWeight="Bold" Foreground="#475569" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Выберите запись в списке для просмотра подробностей, параметров, переменных и действий"
+                                               FontSize="11" Foreground="#334155" TextWrapping="Wrap" TextAlignment="Center" Margin="10,6,10,0" MaxWidth="280"/>
+                                </StackPanel>
+
+                                <!-- Блок подробностей события -->
+                                <ScrollViewer x:Name="HistoryDetailContent" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                                    <StackPanel>
+                                        <!-- Верх: Статус и время -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border x:Name="DetailStatusBadge" Grid.Column="0" Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="4" Padding="8,3" HorizontalAlignment="Left">
+                                                <TextBlock x:Name="DetailStatusText" Text="ВЫПОЛНЕНО" FontSize="11" FontWeight="Bold" Foreground="#34D399"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock x:Name="DetailTimeText" Text="12:00:00" FontSize="11" Foreground="#94A3B8" Margin="0,0,8,0"/>
+                                                <TextBlock x:Name="DetailDurationText" Text="12 мс" FontSize="10" Foreground="#64748B"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Распознанная фраза -->
+                                        <TextBlock Text="УСЛЫШАННАЯ ФРАЗА" FontSize="10" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,4"/>
+                                        <Border Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,0,10">
+                                            <TextBlock x:Name="DetailPhraseText" Text="открой браузер" FontSize="13" FontWeight="SemiBold" Foreground="#F8FAFC" TextWrapping="Wrap"/>
+                                        </Border>
+
+                                        <!-- Действия над фразой (создать команду) -->
+                                        <Button x:Name="CreateCommandFromHistoryBtn" Content="+ Создать команду из этой фразы"
+                                                Height="28" Background="#1E293B" BorderBrush="#0284C7" Foreground="#38BDF8" FontSize="11" FontWeight="SemiBold"
+                                                Margin="0,0,0,14" Click="CreateCommandFromHistory_Click"/>
+
+                                        <Separator Background="#1E293B" Margin="0,0,0,12"/>
+
+                                        <!-- Команда и Пакет -->
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="СОВПАВШАЯ КОМАНДА" FontSize="10" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,2"/>
+                                                <TextBlock x:Name="DetailCommandText" Text="-" FontSize="13" FontWeight="Bold" Foreground="#38BDF8" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock x:Name="DetailPackText" Text="Пакет: -" FontSize="11" Foreground="#94A3B8" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="Точность" FontSize="10" Foreground="#64748B" HorizontalAlignment="Right"/>
+                                                <TextBlock x:Name="DetailConfidenceText" Text="100%" FontSize="13" FontWeight="Bold" Foreground="#34D399" HorizontalAlignment="Right"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Кнопка повторного запуска команды -->
+                                        <Button x:Name="RepeatHistoryCommandBtn" Content="Повторить выполнение команды"
+                                                Height="28" Background="#064E3B" BorderBrush="#10B981" Foreground="#34D399" FontSize="11" FontWeight="SemiBold"
+                                                Margin="0,0,0,14" Click="RepeatHistoryCommand_Click"/>
+
+                                        <Separator Background="#1E293B" Margin="0,0,0,12"/>
+
+                                        <!-- Контекст процесса и окна -->
+                                        <TextBlock Text="КОНТЕКСТ ВЫЗОВА" FontSize="10" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,4"/>
+                                        <Border Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,0,12">
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                    <TextBlock Text="Процесс: " FontSize="11" Foreground="#64748B"/>
+                                                    <TextBlock x:Name="DetailProcessText" Text="-" FontSize="11" FontWeight="SemiBold" Foreground="#F8FAFC"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Окно: " FontSize="11" Foreground="#64748B"/>
+                                                    <TextBlock x:Name="DetailWindowText" Text="-" FontSize="11" Foreground="#94A3B8" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Извлеченные переменные / слоты -->
+                                        <StackPanel x:Name="DetailVariablesSection" Margin="0,0,0,12" Visibility="Collapsed">
+                                            <TextBlock Text="ИЗВЛЕЧЕННЫЕ СЛОТЫ / ПЕРЕМЕННЫЕ" FontSize="10" FontWeight="Bold" Foreground="#A78BFA" Margin="0,0,0,4"/>
+                                            <Border Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="6" Padding="10,8">
+                                                <TextBlock x:Name="DetailVariablesText" Text="-" FontSize="11" Foreground="#DDD6FE" TextWrapping="Wrap"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Список действий в цепочке -->
+                                        <StackPanel x:Name="DetailActionsSection" Margin="0,0,0,12" Visibility="Collapsed">
+                                            <TextBlock Text="ДЕЙСТВИЯ КОМАНДЫ" FontSize="10" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,4"/>
+                                            <Border Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="6" Padding="8">
+                                                <ItemsControl x:Name="DetailActionsItemsControl">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Margin="0,2" Background="#0F172A" BorderBrush="#334155" BorderThickness="1" CornerRadius="4" Padding="6,4">
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <TextBlock Text="{Binding OrderText}" FontSize="10" FontWeight="Bold" Foreground="#38BDF8" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                                    <StackPanel Grid.Column="1">
+                                                                        <TextBlock Text="{Binding ActionTitle}" FontSize="11" FontWeight="SemiBold" Foreground="#F8FAFC"/>
+                                                                        <TextBlock Text="{Binding ActionDetail}" FontSize="10" Foreground="#64748B" TextTrimming="CharacterEllipsis"/>
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Нижние кнопки -->
+                                        <Button x:Name="CopyHistoryDetailBtn" Content="Скопировать сведения о событии"
+                                                Height="28" Background="#1E293B" BorderBrush="#334155" FontSize="11" Margin="0,4,0,0"
+                                                Click="CopyHistoryItem_Click"/>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- 3. НИЖНЯЯ ПАНЕЛЬ: ТЕСТ И СТАТУС -->
+        <Border Grid.Row="2" Background="#111827" BorderBrush="#1F2937" BorderThickness="0,1,0,0" Padding="16,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Индикатор громкости микрофона -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0">
+                    <TextBlock Text="Микрофон:" FontSize="12" FontWeight="Medium" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <Border Background="#0F172A" BorderBrush="#334155" BorderThickness="1" CornerRadius="4" Padding="2" VerticalAlignment="Center">
+                        <ProgressBar x:Name="MainMicLevelBar" Width="90" Height="8" Minimum="0" Maximum="1" Value="0"
+                                     Foreground="#10B981" Background="Transparent" BorderThickness="0"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- Поле ручного ввода для теста -->
+                <Grid Grid.Column="1" HorizontalAlignment="Left" MaxWidth="520" Margin="0,0,20,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="TestPhraseInput" Grid.Column="0" Height="30" Padding="10,4" MinWidth="320"
+                             helpers:PlaceholderHelper.Placeholder="Тест фразы (например: 'открой youtube')..."
+                             KeyDown="TestPhraseInput_KeyDown"/>
+                    <Button x:Name="RunTestBtn" Grid.Column="1" Content="Проверить" Height="30" Background="#0284C7" BorderBrush="#0EA5E9"
+                            Padding="12,3" FontSize="11" Margin="6,0,0,0" Click="RunTestBtn_Click"/>
+                </Grid>
+
+                <!-- Последнее действие / статус -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Статус:" FontSize="12" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <TextBlock x:Name="LogStatusText" Text="Готов к голосовым командам" FontSize="12" FontWeight="Medium"
+                               Foreground="#38BDF8" VerticalAlignment="Center" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

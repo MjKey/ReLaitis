@@ -1,0 +1,95 @@
+    <Window x:Class="ReLaitis.UI.Views.AddActionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Конструктор действий"
+        Height="570" Width="600"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#0F172A"
+        Foreground="#F8FAFC">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- 0. Заголовок -->
+            <RowDefinition Height="Auto"/> <!-- 1. Фильтр категорий -->
+            <RowDefinition Height="Auto"/> <!-- 2. Выбор действия -->
+            <RowDefinition Height="Auto"/> <!-- 3. Конструктор логического блока -->
+            <RowDefinition Height="*"/>    <!-- 4. Параметры -->
+            <RowDefinition Height="Auto"/> <!-- 5. Кнопки -->
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="DialogTitle" Grid.Row="0" Text="Конструктор действия макроса" FontSize="16" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,14"/>
+
+        <!-- Фильтр по категориям -->
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Категория:" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <ComboBox x:Name="CategoryComboBox" Grid.Column="1" Height="32" SelectionChanged="CategoryComboBox_SelectionChanged"/>
+        </Grid>
+
+        <!-- Выбор конкретного действия внутри категории -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,12">
+            <TextBlock Text="Тип действия:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,4"/>
+            <ComboBox x:Name="ActionTypeComboBox" Height="34" SelectionChanged="ActionTypeComboBox_SelectionChanged"/>
+        </StackPanel>
+
+        <!-- Опции логического блока (автоматическое создание пары) -->
+        <Border x:Name="LogicBlockOptionsPanel" Grid.Row="3" Background="#111C2E" BorderBrush="#1E3A5F" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,12" Visibility="Collapsed">
+            <StackPanel>
+                <TextBlock Text="КОНСТРУКТОР ЛОГИЧЕСКОГО БЛОКА" FontSize="10" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,6"/>
+                <CheckBox x:Name="AutoEndBlockCheckBox" Content="Автоматически закрыть блок «Конец блока (EndBlock)»" IsChecked="True"/>
+                <CheckBox x:Name="AutoElseCheckBox" Content="Добавить ветку «Иначе (Else)» для альтернативы" Margin="0,6,0,0" Visibility="Collapsed"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Поля параметров -->
+        <StackPanel Grid.Row="4">
+            <!-- Параметр 1 -->
+            <TextBlock x:Name="Param1Label" Text="Параметр 1:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,4"/>
+            <Grid x:Name="Param1SingleLineGrid" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="Param1Box" Grid.Column="0" Height="32"/>
+                <Button x:Name="BrowseFileBtn" Grid.Column="1" Content="..." Width="32" Height="32" Margin="6,0,0,0" Visibility="Collapsed" Click="BrowseFileBtn_Click"/>
+                <Button x:Name="PickActiveProcessBtn" Grid.Column="2" Content="Активное окно" Padding="8,0" Height="32" Margin="6,0,0,0" Visibility="Collapsed" Click="PickActiveProcessBtn_Click" ToolTip="Вставить имя процесса текущего активного окна"/>
+            </Grid>
+
+            <!-- Многострочный редактор C# кода -->
+            <TextBox x:Name="ParamCodeBox" Height="130" Margin="0,0,0,8"
+                     FontFamily="Cascadia Code, Consolas, Courier New" FontSize="12"
+                     AcceptsReturn="True" AcceptsTab="True"
+                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                     Visibility="Collapsed"
+                     Background="#090D16" Foreground="#E2E8F0" BorderBrush="#334155"
+                     MouseDoubleClick="ParamCodeBox_MouseDoubleClick"/>
+
+            <!-- Кнопка открытия полноценного окна редактора -->
+            <Button x:Name="OpenCodeEditorBtn" Content="Открыть редактор C# с проверкой и компиляцией..."
+                    Height="32" Margin="0,0,0,10"
+                    Background="#1E1B4B" Foreground="#C4B5FD" BorderBrush="#6366F1"
+                    FontWeight="SemiBold" Cursor="Hand"
+                    Visibility="Collapsed"
+                    Click="OpenCodeEditorBtn_Click"/>
+
+            <!-- Параметр 2 -->
+            <TextBlock x:Name="Param2Label" Text="Параметр 2:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,4"/>
+            <TextBox x:Name="Param2Box" Height="32" Margin="0,0,0,10"/>
+
+            <!-- Подсказка по переменным -->
+            <TextBlock x:Name="HintTextBlock" Text="Подсказка: можно использовать переменные, например {ActiveProcess}, {Time} или {переменная}."
+                       FontSize="11" Foreground="#64748B" TextWrapping="Wrap" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Кнопки действий -->
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <Button Content="Отмена" Width="90" Height="34" Click="CancelBtn_Click" Margin="0,0,10,0"/>
+            <Button x:Name="SaveBtn" Content="Добавить" Width="100" Height="34" Background="#0284C7" BorderBrush="#0EA5E9" FontWeight="SemiBold" Click="AddBtn_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

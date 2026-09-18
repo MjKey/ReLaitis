@@ -1,0 +1,109 @@
+<Window x:Class="ReLaitis.UI.Views.EditVariableDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Переменная"
+        SizeToContent="Height" Width="480"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#0F172A"
+        Foreground="#F8FAFC">
+
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#1E293B"/>
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="BorderBrush" Value="#334155"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#1E293B"/>
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="BorderBrush" Value="#334155"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="CaretBrush" Value="#38BDF8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Margin="6,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#38BDF8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Заголовок -->
+            <RowDefinition Height="Auto"/> <!-- Имя переменной -->
+            <RowDefinition Height="Auto"/> <!-- Значение переменной -->
+            <RowDefinition Height="Auto"/> <!-- Подсказка -->
+            <RowDefinition Height="Auto"/> <!-- Кнопки -->
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="DialogTitle" Grid.Row="0" Text="Общая переменная" FontSize="16" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,16"/>
+
+        <!-- Имя переменной -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,14">
+            <TextBlock Text="Имя переменной (ключ):" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,5"/>
+            <TextBox x:Name="VariableNameBox" Height="34" Text=""/>
+            <TextBlock Text="Используйте латинские или русские буквы, цифры и _ (без скобок)" FontSize="10" Foreground="#64748B" Margin="0,3,0,0"/>
+        </StackPanel>
+
+        <!-- Значение переменной -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,14">
+            <TextBlock Text="Значение переменной:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,5"/>
+            <TextBox x:Name="VariableValueBox" Height="34" Text=""/>
+            <TextBlock x:Name="PlaceholderPreviewText" Text="В макросах: {имя}" FontSize="11" Foreground="#38BDF8" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Карточка-подсказка -->
+        <Border Grid.Row="3" Background="#0B1220" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,0,18">
+            <TextBlock Text="Переменная доступна во всех макросах и пакетах через {имя}, а также в действиях «Задать значение переменной» и условиях «Если значение переменной»."
+                       FontSize="11" Foreground="#94A3B8" TextWrapping="Wrap" LineHeight="16"/>
+        </Border>
+
+        <!-- Кнопки управления -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Отмена" Width="90" Click="CancelBtn_Click" Margin="0,0,10,0"/>
+            <Button x:Name="SaveBtn" Content="Сохранить" Width="110" Background="#0284C7" BorderBrush="#0EA5E9" Click="SaveBtn_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

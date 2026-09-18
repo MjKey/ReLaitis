@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>ReLaitis Voice Bridge</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      width: 320px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0F172A;
+      color: #F8FAFC;
+      font-size: 13px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #334155;
+    }
+    .logo {
+      font-size: 16px;
+      font-weight: 700;
+      color: #38BDF8;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: #1E293B;
+      border: 1px solid #334155;
+    }
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #EF4444;
+    }
+    .status-badge.connected .status-indicator {
+      background: #10B981;
+      box-shadow: 0 0 6px #10B981;
+    }
+    .section {
+      background: #1E293B;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+    .label {
+      font-size: 11px;
+      color: #94A3B8;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .value {
+      font-size: 12px;
+      color: #E2E8F0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .buttons-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #334155;
+      background: #1E293B;
+      color: #F8FAFC;
+      transition: all 0.15s;
+    }
+    button:hover {
+      background: #334155;
+      border-color: #475569;
+    }
+    button.primary {
+      background: #0284C7;
+      border-color: #0EA5E9;
+      grid-column: span 2;
+    }
+    button.primary:hover {
+      background: #0369A1;
+    }
+    .footer {
+      font-size: 11px;
+      color: #64748B;
+      text-align: center;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">ReLaitis Voice</div>
+    <div id="statusBadge" class="status-badge">
+      <span class="status-indicator"></span>
+      <span id="statusText">Ожидание...</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">Активная страница</div>
+    <div id="tabTitle" class="value">Загрузка...</div>
+    <div id="tabUrl" class="value" style="color: #38BDF8; font-size: 11px; margin-top: 2px;"></div>
+  </div>
+
+  <div class="buttons-grid">
+    <button id="showHintsBtn" class="primary">Показать номера элементов</button>
+    <button id="hideHintsBtn">Скрыть номера</button>
+    <button id="reconnectBtn">Переподключить</button>
+  </div>
+
+  <div class="footer">
+    Голосовые команды: «Ссылки», «Клик 5», «Страница вниз»
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
