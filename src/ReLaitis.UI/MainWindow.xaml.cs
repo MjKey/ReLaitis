@@ -52,11 +52,13 @@ public partial class MainWindow : Window
     private bool _isUpdatingUi;
     private bool _isExiting;
     private UserSettings _settings;
+    private bool _isInitialized;
 
     public MainWindow()
     {
         App.Diag("MainWindow constructor started");
         InitializeComponent();
+        _isInitialized = true;
         App.Diag("MainWindow InitializeComponent finished");
 
         System.Windows.Application.Current.SessionEnding += (s, e) =>
@@ -380,7 +382,7 @@ public partial class MainWindow : Window
         {
             UpdateHistoryCountsAndKpis();
         };
-        UpdateHistoryCountsAndKpis();
+        ApplyHistoryFilter();
 
         // Инициализация общих переменных
         VariablesListView.ItemsSource = _variableItems;
@@ -629,6 +631,7 @@ public partial class MainWindow : Window
 
     private void SearchCommandsBox_TextChanged(object sender, TextChangedEventArgs e)
     {
+        if (!_isInitialized) return;
         RefreshCommandsList();
     }
 
@@ -1179,6 +1182,7 @@ public partial class MainWindow : Window
 
     private void SearchVariablesBox_TextChanged(object sender, TextChangedEventArgs e)
     {
+        if (!_isInitialized) return;
         RefreshVariablesUi(SearchVariablesBox.Text);
     }
 
@@ -1460,6 +1464,8 @@ public partial class MainWindow : Window
 
     private void NavTab_Click(object sender, RoutedEventArgs e)
     {
+        if (!_isInitialized || CollectionsPanel == null || TabCollectionsRadio == null) return;
+
         if (TabCollectionsRadio.IsChecked == true)
         {
             CollectionsPanel.Visibility = Visibility.Visible;
@@ -1681,15 +1687,14 @@ public partial class MainWindow : Window
 
     private void EngineRadio_Checked(object sender, RoutedEventArgs e)
     {
-        if (WhisperModelPanel != null)
-        {
-            WhisperModelPanel.Visibility = WhisperEngineRadio.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-        }
+        if (!_isInitialized || WhisperModelPanel == null || WhisperEngineRadio == null) return;
+        WhisperModelPanel.Visibility = WhisperEngineRadio.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void TtsRadio_Checked(object sender, RoutedEventArgs e)
     {
-        if (EdgeVoicePanel == null || SapiVoicePanel == null || OpenAiTtsPanel == null)
+        if (!_isInitialized || EdgeVoicePanel == null || SapiVoicePanel == null || OpenAiTtsPanel == null ||
+            EdgeTtsRadio == null || SapiTtsRadio == null || OpenAiTtsRadio == null)
             return;
 
         EdgeVoicePanel.Visibility = EdgeTtsRadio.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
@@ -1812,7 +1817,14 @@ public partial class MainWindow : Window
 
     private void UpdateHistoryCountsAndKpis()
     {
-        if (HistoryTotalCountText == null) return;
+        if (!_isInitialized ||
+            HistoryTotalCountText == null ||
+            HistorySuccessRateText == null ||
+            HistoryUnmatchedCountText == null ||
+            HistoryAvgConfidenceText == null ||
+            HistoryCountText == null ||
+            _historyItems == null)
+            return;
 
         var total = _historyItems.Count;
         var executed = _historyItems.Count(i => i.Type == HistoryEntryType.Executed);
@@ -1851,6 +1863,7 @@ public partial class MainWindow : Window
 
     private void ApplyHistoryFilter()
     {
+        if (!_isInitialized) return;
         _historyView?.Refresh();
         UpdateHistoryCountsAndKpis();
     }
@@ -1885,11 +1898,13 @@ public partial class MainWindow : Window
 
     private void HistoryFilter_Checked(object sender, RoutedEventArgs e)
     {
+        if (!_isInitialized) return;
         ApplyHistoryFilter();
     }
 
     private void HistorySearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
+        if (!_isInitialized) return;
         ApplyHistoryFilter();
     }
 
