@@ -38,8 +38,8 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# Локальные модели и логи
-models/
+# Локальные скачанные модели Vosk и логи в корне
+/models/
 *.onnx
 *.bin
 startup_diag.log
